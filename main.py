@@ -1,6 +1,7 @@
 from datetime import datetime
 import requests
 import time 
+import os
 import urllib.parse
 
 from flask import Flask, redirect, request, jsonify, session
@@ -158,7 +159,7 @@ def refresh_token():
         return redirect('/setrecplaylist')
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', debug=True)
+    app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
 
 
 

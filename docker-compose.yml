@@ -14,7 +14,7 @@ services:
       
   celery_worker:
     build: .
-    command: celery -A tasks worker --loglevel=INFO --pidfile='' 
+    command: celery -A tasks.celery_app worker --loglevel=INFO
     depends_on:
       - redis
     env_file:

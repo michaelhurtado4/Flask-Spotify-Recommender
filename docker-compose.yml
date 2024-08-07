@@ -14,7 +14,7 @@ services:
       
   celery_worker:
     build: .
-    command: celery -A celery_config.celery_app worker --loglevel=INFO- -pidfile=''
+    command: celery -A celery_config.celery_app worker --loglevel=info --pool=prefork --queues=cloud_queue
     depends_on:
       - redis
     env_file:

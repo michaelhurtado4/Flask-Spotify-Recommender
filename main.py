@@ -1,17 +1,10 @@
 from datetime import datetime
-from dotenv import load_dotenv
-import os
 import requests
 import time 
 import urllib.parse
 
 from flask import Flask, redirect, request, jsonify, session
 
-load_dotenv()
-
-
-client_id = os.getenv("CLIENT_ID")
-client_secret = os.getenv("CLIENT_SECRET")
 app = Flask(__name__)
 app.secret_key = '123RANdomKeyINeed675'
 TIME = datetime.now().timestamp()

@@ -9,6 +9,8 @@ from flask import Flask, redirect, request, jsonify, session
 app = Flask(__name__)
 app.secret_key = '123RANdomKeyINeed675'
 TIME = datetime.now().timestamp()
+client_id = os.getenv('client_id)
+client_secret = os.getenv('client_secret')
 PLAYLIST = ''
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = "https://accounts.spotify.com/api/token"
@@ -28,7 +30,7 @@ def login():
         'response_type': 'code',
         'scope': scope,
         'redirect_uri': REDIRECT_URI,
-        'show_dialog': True
+        'show_dialog': False
     }
 
     auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(parameters)}"

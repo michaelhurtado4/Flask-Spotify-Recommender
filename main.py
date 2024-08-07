@@ -9,7 +9,7 @@ from flask import Flask, redirect, request, jsonify, session
 app = Flask(__name__)
 app.secret_key = '123RANdomKeyINeed675'
 TIME = datetime.now().timestamp()
-client_id = os.getenv('client_id)
+client_id = os.getenv('client_id')
 client_secret = os.getenv('client_secret')
 PLAYLIST = ''
 AUTH_URL = 'https://accounts.spotify.com/authorize'

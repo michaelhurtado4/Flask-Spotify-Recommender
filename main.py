@@ -1,21 +1,23 @@
 from datetime import datetime
+from dotenv import load_dotenv
+import os
 import requests
 import time 
-import os
 import urllib.parse
 
 from flask import Flask, redirect, request, jsonify, session
 
+load_dotenv()
+
+client_id = os.getenv("client_id")
+client_secret = os.getenv("client_secret")
 app = Flask(__name__)
-app.secret_key = '123RANdomKeyINeed675'
-TIME = datetime.now().timestamp()
-client_id = os.getenv('client_id')
-client_secret = os.getenv('client_secret')
-PLAYLIST = ''
+
+app.secret_key = os.getenv("secret_key")
 AUTH_URL = 'https://accounts.spotify.com/authorize'
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 API_BASE_URL = 'https://api.spotify.com/v1/'
-REDIRECT_URI = 'http://localhost:5000/callback'
+REDIRECT_URI = os.getenv('redirect_uri')
 
 @app.route('/')
 def index():
@@ -30,7 +32,7 @@ def login():
         'response_type': 'code',
         'scope': scope,
         'redirect_uri': REDIRECT_URI,
-        'show_dialog': False
+        'show_dialog': True
     }
 
     auth_url = f"{AUTH_URL}?{urllib.parse.urlencode(parameters)}"
@@ -57,13 +59,12 @@ def callback():
     session['access_token'] = token_info['access_token']
     session['refresh_token'] = token_info['refresh_token']
     session['expires_at'] = datetime.now().timestamp() + token_info['expires_in']
+    session['time'] = datetime.now().timestamp()
 
     return redirect('/setrecplaylist')
 
 @app.route('/setrecplaylist')
 def set_rec_playlist():
-
-    global PLAYLIST
 
     if 'access_token' not in session:
         return redirect('/login')
@@ -82,7 +83,7 @@ def set_rec_playlist():
     for playlist in playlists['items']:
         if playlist['name'] == 'Songs to Try':
             check = True
-            PLAYLIST = playlist['id']
+            session['playlist'] = playlist['id']
     if (check == False): 
         response = requests.get(API_BASE_URL + 'me', headers=headers)
         user_details = response.json()
@@ -94,15 +95,12 @@ def set_rec_playlist():
         }
         response = requests.post(API_BASE_URL + f'users/{user_id}/playlists', headers=headers, json=data)
         response_json = response.json()
-        PLAYLIST = response_json['id']
+        session['playlist'] = response_json['id']
     
     return redirect('/likedsongs')
 
 @app.route('/likedsongs')
 def get_likedsongs():
-
-    global TIME
-    global PLAYLIST
 
     if 'access_token' not in session:
         return redirect('/login')
@@ -122,7 +120,7 @@ def get_likedsongs():
     songs_to_add = []
     for song in likedsongs['items']:
         song_time = datetime.strptime(song['added_at'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
-        if (song_time > TIME):
+        if (song_time > session['time']):
             print(song['track']['name'])
             response = requests.get(API_BASE_URL + f"recommendations?limit=3&seed_tracks={song['track']['id']}&min_popularity=70", headers=headers)
             recommendedsongs = response.json()
@@ -133,11 +131,10 @@ def get_likedsongs():
         'uris': songs_to_add,
         'position': 0
     }      
-    response = requests.post(API_BASE_URL + f'playlists/{PLAYLIST}/tracks', headers=headers, json=data)
-    TIME = datetime.strptime(likedsongs['items'][0]['added_at'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
+    response = requests.post(API_BASE_URL + f"playlists/{session['playlist']}/tracks", headers=headers, json=data)
+    session['time'] = datetime.strptime(likedsongs['items'][0]['added_at'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
     time.sleep(30)
     return redirect('/likedsongs')
-
 
 @app.route('/refresh-token')
 def refresh_token():
@@ -162,9 +159,3 @@ def refresh_token():
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=int(os.environ.get('PORT', 5000)))
-
-
-
-
-
-

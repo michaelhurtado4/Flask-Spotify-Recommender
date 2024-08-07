@@ -1,25 +1,16 @@
-from celery import Celery
+from celery_config import celery_app
 import redis 
 from celery.schedules import crontab
 import requests 
 from datetime import datetime 
 import os 
 REDIS_URL = os.getenv('redis_url')
-app = Celery('tasks', broker=REDIS_URL)
-redis_client = redis.StrictRedis.from_url(REDIS_URL)
 API_BASE_URL = 'https://api.spotify.com/v1/'
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 client_id = os.getenv("client_id")
 client_secret = os.getenv("client_secret")
 
-app.conf.beat_schedule = {
-    'run-get-likedsongs-every-30-seconds': {
-        'task': 'tasks.get_likedsongs',
-        'schedule': 30.0,  # Every 30 seconds
-    },
-}
-
-@app.task
+@celery_app.task(name='tasks.refresh_token')
 def refresh_token():
     refresh_token = redis_client.get('refresh_token').decode('utf-8')
     req_body = {
@@ -33,7 +24,7 @@ def refresh_token():
     redis_client.set('access_token', new_token_info['access_token']) 
     redis_client.set('expires_at', datetime.now().timestamp() + new_token_info['expires_in'])
 
-@app.task
+@celery_app.task(name='tasks.get_likedsongs')
 def get_likedsongs():
     
     expires_at = float(redis_client.get('expires_at'))

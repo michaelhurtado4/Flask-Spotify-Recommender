@@ -128,7 +128,7 @@ def get_likedsongs():
         song_time = datetime.strptime(song['added_at'], "%Y-%m-%dT%H:%M:%SZ").timestamp()
         if (song_time > TIME):
             print(song['track']['name'])
-            response = requests.get(API_BASE_URL + f'recommendations?limit=3&seed_tracks={song['track']['id']}&min_popularity=70', headers=headers)
+            response = requests.get(API_BASE_URL + f"recommendations?limit=3&seed_tracks={song['track']['id']}&min_popularity=70", headers=headers)
             recommendedsongs = response.json()
             for rec_song in recommendedsongs['tracks']:
                 songs_to_add.append(rec_song['uri'])

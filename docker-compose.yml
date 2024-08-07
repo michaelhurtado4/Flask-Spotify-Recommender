@@ -11,10 +11,7 @@ services:
       - .:/app
     depends_on:
       - redis
-
-  redis:
-    image: "redis:alpine"
-
+      
   celery_worker:
     build: .
     command: celery -A tasks worker --loglevel=INFO --pidfile='' 

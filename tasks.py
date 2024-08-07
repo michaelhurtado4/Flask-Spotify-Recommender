@@ -9,6 +9,8 @@ API_BASE_URL = 'https://api.spotify.com/v1/'
 TOKEN_URL = "https://accounts.spotify.com/api/token"
 client_id = os.getenv("client_id")
 client_secret = os.getenv("client_secret")
+redis_client = redis.StrictRedis.from_url(REDIS_URL)
+
 
 @celery_app.task(name='tasks.refresh_token')
 def refresh_token():

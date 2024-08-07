@@ -104,7 +104,7 @@ def set_rec_playlist():
         redis_client.set('playlist', response_json['id'])
         session['playlist'] = response_json['id']
 
-    subprocess.Popen(["celery", "-A", "tasks", "beat", "--loglevel=info"], start_new_session=True)
+    subprocess.Popen(["celery", "-A", "celery_config.celery_app", "beat", "--loglevel=info"], start_new_session=True)
     
     return jsonify(playlists)
 

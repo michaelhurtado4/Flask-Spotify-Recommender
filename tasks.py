@@ -5,8 +5,8 @@ import requests
 from datetime import datetime 
 import os 
 
-app = Celery('tasks', broker='redis://redis:6379/0')
 REDIS_URL = os.getenv('redis_url')
+app = Celery('tasks', broker=REDIS_URL)
 redis_client = redis.StrictRedis.from_url(REDIS_URL)
 API_BASE_URL = 'https://api.spotify.com/v1/'
 TOKEN_URL = "https://accounts.spotify.com/api/token"
